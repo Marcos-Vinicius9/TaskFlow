@@ -1,5 +1,6 @@
 package com.taskmanager.taskflow.controller;
 
+import com.taskmanager.taskflow.config.SecurityConfig;
 import com.taskmanager.taskflow.model.User;
 import com.taskmanager.taskflow.service.UserService;
 import jakarta.validation.Valid;
@@ -14,6 +15,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private SecurityConfig securityConfig;
 
     @GetMapping
     public ResponseEntity<Object> findAllUsers(){
@@ -24,6 +27,13 @@ public class UserController {
     public ResponseEntity<Object> registerUser(@Valid @RequestBody User user){
         return ResponseEntity.accepted().body(this.userService.registerUser(user));
     }
+    @PostMapping("/login")
+    public ResponseEntity<Object> testLogin(@RequestBody User user){
+        String storedHash = userService.findUserByEmail(user.getEmail()).getPassword();
+        return ResponseEntity.accepted().body(this.userService.loginTest(storedHash, user.getPassword()));
+    }
+
+
 
 
 }
