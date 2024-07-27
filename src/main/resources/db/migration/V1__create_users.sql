@@ -7,5 +7,6 @@ CREATE TABLE users (
     full_name VARCHAR(100) NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
-    last_login TIMESTAMP
+    last_login TIMESTAMP,
+    active BOOLEAN DEFAULT FALSE
 );

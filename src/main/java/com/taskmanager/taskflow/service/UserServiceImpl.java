@@ -1,25 +1,31 @@
 package com.taskmanager.taskflow.service;
 
-import com.taskmanager.taskflow.config.SecurityConfig;
 import com.taskmanager.taskflow.exception.EmailAlreadyExistsException;
 import com.taskmanager.taskflow.model.User;
+import com.taskmanager.taskflow.model.UserActivation;
 import com.taskmanager.taskflow.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
-@AllArgsConstructor
 public class UserServiceImpl implements UserService{
 
+    
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private UserActivationService userActivationService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -32,17 +38,32 @@ public class UserServiceImpl implements UserService{
         return userRepository.findUserByEmail(email);
     }
 
-    public User registerUser(User user){
+    public Optional<User> findUserById(UUID id){
+        return userRepository.findById(id);
+    }
+
+    public User registerUser(User user) throws MessagingException {
         if(userRepository.findUserByEmail(user.getEmail()) != null){
             throw new EmailAlreadyExistsException("Já existe um usuário cadastrado com esse e-mail");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        UUID tokenConfirmation = generateTokenConfirmation();
+        UserActivation userActivation = new UserActivation(tokenConfirmation, userRepository.save(user).getId());
+        userActivationService.addUserActivationToken(userActivation);
+        System.out.println(tokenConfirmation.toString());
+        emailService.sendConfirmationMessage(user, tokenConfirmation.toString());
+        return user;
     }
 
     public Boolean loginTest(String storedHash, String passwordUser){
-        System.out.println(storedHash);
-        System.out.println(passwordUser);
         return passwordEncoder.matches(passwordUser, storedHash);
     }
+
+    public Boolean confirmationAccount(String token){
+        return this.userActivationService.confirmActivationAccount(token);
+    }
+    public UUID generateTokenConfirmation (){
+        return UUID.randomUUID();
+    }
+
 }

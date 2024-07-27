@@ -1,6 +1,5 @@
 package com.taskmanager.taskflow.controller;
 
-import com.taskmanager.taskflow.exception.EmailAlreadyExistsException;
 import com.taskmanager.taskflow.exception.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 public class HandlerExceptionController extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({Exception.class})
-    public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(EmailAlreadyExistsException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleException(Exception exception, HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 request.getRequestURI(),
