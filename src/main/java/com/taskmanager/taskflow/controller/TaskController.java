@@ -52,6 +52,6 @@ public class TaskController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<Object> getTasksByUserId(@PathVariable UUID userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(this.taskService.getTasksByUserId(userId));
+        return ResponseEntity.accepted().body(this.taskService.getTasksByUserId(userId));
     }
 }
